@@ -1,17 +1,24 @@
 class Joke {
-  final int id;
-  final String type;
   final String setup;
   final String punchline;
 
-  Joke({required this.id, required this.type, required this.setup, required this.punchline});
+  bool isFavorite;
+
+  Joke({required this.setup, required this.punchline, this.isFavorite = false});
 
   factory Joke.fromJson(Map<String, dynamic> json) {
     return Joke(
-      id: json['id'],
-      type: json['type'],
       setup: json['setup'],
       punchline: json['punchline'],
+      isFavorite: json['isFavorite'] ?? false,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'setup': setup,
+      'punchline': punchline,
+      'isFavorite': isFavorite,
+    };
   }
 }

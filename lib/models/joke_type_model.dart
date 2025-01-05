@@ -1,9 +1,16 @@
-class JokeType {
-  final String type;
+class Joke {
+  final String setup;
+  final String punchline;
 
-  JokeType({required this.type});
+  bool isFavorite = false;
 
-  factory JokeType.fromJson(String type) {
-    return JokeType(type: type);
+
+  Joke({required this.setup, required this.punchline});
+
+  factory Joke.fromJson(Map<String, dynamic> json) {
+    return Joke(
+      setup: json['setup'],
+      punchline: json['punchline'],
+    );
   }
 }
