@@ -11,6 +11,7 @@ import 'package:mis_lab_2/screens/register_screen.dart';
 import 'package:mis_lab_2/services/auth_service.dart';
 import 'package:mis_lab_2/services/firebase_service.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'firebase_options.dart';
 import 'models/joke_model.dart';
@@ -18,18 +19,17 @@ import 'providers/password_visibility_provider.dart';
 import 'providers/joke_provider.dart';
 import 'screens/main_screen.dart';
 
-
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Handle background messages
+
   print('Handling a background message: ${message.messageId}');
 }
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
   try {
     await dotenv.load(fileName: ".env");
     print("Environment file loaded successfully: ${dotenv.env}");
@@ -37,7 +37,6 @@ void main() async {
     print("Error loading environment file: $e");
   }
 
-  // Initialize Firebase
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -49,6 +48,13 @@ void main() async {
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('@mipmap/ic_launcher');
+  const InitializationSettings initializationSettings =
+  InitializationSettings(android: initializationSettingsAndroid);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
   runApp(const MyApp());
 }
 
@@ -59,20 +65,39 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
+    // Request permissions for notifications
+    messaging.requestPermission();
 
+    // Handle foreground notifications
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
 
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'channel_id', // Channel ID
+              'channel_name', // Channel Name
+              importance: Importance.high,
+              priority: Priority.high,
+            ),
+          ),
+        );
+      }
+    });
 
     return MultiProvider(
       providers: [
-
         Provider<AuthService>(
           create: (_) => AuthService(),
         ),
-
         ChangeNotifierProvider<PasswordVisibilityProvider>(
           create: (_) => PasswordVisibilityProvider(),
         ),
-
         ChangeNotifierProvider<JokeProvider>(
           create: (_) => JokeProvider(),
         ),
@@ -82,7 +107,6 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-
         home: const LoginPage(),
       ),
     );
