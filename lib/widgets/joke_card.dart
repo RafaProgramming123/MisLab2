@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 
 class JokeCard extends StatelessWidget {
-  final String type;
+  final String jokeType;
+  final Color? color;
+  final VoidCallback onTap;
 
-  const JokeCard({super.key, required this.type});
+  const JokeCard({
+    super.key,
+    required this.jokeType,
+    this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, '/jokes_list', arguments: type);
-      },
+      onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: color ?? Colors.white,
           borderRadius: BorderRadius.circular(15.0),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black12,
               offset: Offset(0, 4),
@@ -24,27 +29,27 @@ class JokeCard extends StatelessWidget {
             ),
           ],
         ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          leading: CircleAvatar(
-            backgroundColor: Colors.redAccent,
-            child: Icon(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            const Icon(
               Icons.tag,
-              color: Colors.white,
+              color: Colors.redAccent,
+              size: 24.0,
             ),
-          ),
-          title: Text(
-            type,
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontSize: 18.0,
-              fontWeight: FontWeight.w600,
+            const SizedBox(width: 10.0),
+            Expanded(
+              child: Text(
+                jokeType,
+                style: const TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-          trailing: const Icon(
-            Icons.arrow_forward_ios,
-            color: Colors.redAccent,
-          ),
+          ],
         ),
       ),
     );
